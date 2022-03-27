@@ -18,11 +18,11 @@ Com o script aberto no **VSCode**
 
 Instalar as **bibliotecas** abaixo:
 
-npm i puppeteer
-npm i nodemailer
-npm i dotenv
-npm i chart.js
-npm i quickchart-js
+- npm i puppeteer
+- npm i nodemailer
+- npm i dotenv
+- npm i chart.js
+- npm i quickchart-js
 
 Alterar o arquivo **.env** com os dados pessoais
 
