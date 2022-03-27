@@ -41,16 +41,16 @@ https://totvssuporte.zendesk.com/admin/workspaces/agent-workspace/
 
 
 **qualquer condição**:
-Grupo > É > Cloud Atendimento
-Grupo > É > Cloud PROTHEUS STD
-Grupo > É > Cloud TAF/TSS
-Grupo > É > Cloud 1;2;3;4
+- Grupo > É > Cloud Atendimento
+- Grupo > É > Cloud PROTHEUS STD
+- Grupo > É > Cloud TAF/TSS
+- Grupo > É > Cloud 1;2;3;4
 
 **Colunas:**
-ID
-Atribuido
-Assunto
-Organização
-Proxima violação de SLA
+- ID
+- Atribuido
+- Assunto
+- Organização
+- Proxima violação de SLA
 
 Com o href dessa visualização será necessário ajustar o valor da variável **agtCloudProtheusStdTotal** e os respectivos href
