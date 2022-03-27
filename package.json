@@ -1,0 +1,29 @@
+{
+  "name": "automacao-diario-bordo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chart.js": "^3.7.1",
+    "chartjs-node-canvas": "^4.1.6",
+    "chartjs-plugin-datalabels": "^2.0.0",
+    "chartjs-to-image": "^1.0.5",
+    "cheerio": "^1.0.0-rc.10",
+    "csv-parse": "^5.0.4",
+    "dotenv": "^16.0.0",
+    "emmet": "^2.3.5",
+    "fast-csv": "^4.3.6",
+    "node-csv": "^0.1.2",
+    "nodemailer": "^6.7.2",
+    "puppeteer": "^2.1.1",
+    "python": "^0.0.4",
+    "quickchart-js": "^3.0.0",
+    "readline-sync": "^1.4.10"
+  },
+  "description": ""
+}
