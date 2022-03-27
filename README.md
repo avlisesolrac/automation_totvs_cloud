@@ -8,21 +8,15 @@ Programa desenvolvido para automatizar a geração de relatório diário com a r
   - Gerar gráficos de acordo com os dados obtidos através do Zendesk
   - E enviar por e-mail
 
-#Getting Started
+# Getting Started
 
 Instalar o **nodejs** na máquina.
 
 https://nodejs.org/en/
 
-Com o script aberto no **VSCode**
+Instalar as **dependencias contidas no package.json**:
 
-Instalar as **bibliotecas** abaixo:
-
-- npm i puppeteer
-- npm i nodemailer
-- npm i dotenv
-- npm i chart.js
-- npm i quickchart-js
+- npm i
 
 Alterar o arquivo **.env** com os dados pessoais
 
