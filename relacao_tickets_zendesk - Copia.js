@@ -18,6 +18,8 @@ const agentes = {
   ticketsEsperaDoAgente: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 };
 
+let lista = [];
+let listaWhats = [];
 let listaAgentesComTickets = [];
 let listaAgentesComTicketsAbertos = [];
 let listaAgentesComTicketsEspera =  [];
@@ -196,6 +198,7 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
 
 for(i=0; i<agentes.agente.length;i++){
   if(agentes.ticketsAbertosDoAgente[i] !== 0 || agentes.ticketsEsperaDoAgente[i] !== 0 ){
+    listaWhats.push(`*${agentes.agente[i]}*<br>Tickets Abertos: ${agentes.ticketsAbertosDoAgente[i]} | Tickets em Espera: ${agentes.ticketsEsperaDoAgente[i]}<br><br>`);
     listaAgentesComTickets.push(`"${agentes.agente[i]}"`);
     listaAgentesComTicketsAbertos.push(agentes.ticketsAbertosDoAgente[i]);
     listaAgentesComTicketsEspera.push(agentes.ticketsEsperaDoAgente[i]);
