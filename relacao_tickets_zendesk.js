@@ -18,12 +18,14 @@ const agentes = {
   ticketsEsperaDoAgente: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 };
 
+let lista = [];
 let listaWhats = [];
 let listaAgentesComTickets = [];
 let listaAgentesComTicketsAbertos = [];
 let listaAgentesComTicketsEspera =  [];
 let slaViolado = 0;
 let ticketsNaoAlocados = 0;
+let ticketsNaoAlocadosTAF = 0;
 
 console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets Abertos e em Espera");
 
@@ -110,17 +112,25 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
       (option) => `${option.innerText}`,
     ));
 
+    let groupOwner = await page.$$eval(`table > tbody > tr > td:nth-child(10)`, (options) => options.map (
+      (option) => `${option.innerText}`,
+    ));
+
     //Identifica se o nome do analista que está cadastrado no objeto Global agentes.agente está presente no objeto que foi retornado no método anterior e adiciona +1 no objeto agentes.ticketsAbertosDoAgente do respectivo agente.
     for (const indice in atribuidosAbertos){
       for(var ind=0; ind<=agentes.agente.length; ind++) {
         if(atribuidosAbertos[indice].indexOf(agentes.agente[ind]) > -1){
-          //console.log(indice + " : " + atribuidosAbertos[indice]);
           agentes.ticketsAbertosDoAgente[ind]+=1;
         }
       }
       //Aqui retorna os não alocados, mas precisa alinhar com o coordenador, pois o filtro atual do backlog não está incluindo a fila do TAF/TSS
-      if(atribuidosAbertos[indice].indexOf('-') > -1){
-        //console.log(indice + " : " + atribuidosAbertos[indice]);
+      if(atribuidosAbertos[indice].indexOf('-') > -1 && groupOwner[indice].indexOf('TAF') > -1){
+        ticketsNaoAlocadosTAF+=1;
+      }else if(atribuidosAbertos[indice].indexOf('-') > -1 && groupOwner[indice].indexOf('SQUAD') > -1){
+        ticketsNaoAlocados+=1;
+      }else if(atribuidosAbertos[indice].indexOf('-') > -1 && groupOwner[indice].indexOf('PROTHEUS') > -1){
+        ticketsNaoAlocados+=1;
+      }else if(atribuidosAbertos[indice].indexOf('-') > -1 && groupOwner[indice].indexOf('ATENDIMENTO') > -1){
         ticketsNaoAlocados+=1;
       }
     };
@@ -128,7 +138,6 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
       //dados.push(atribuidosAbertos);
       for (const indiceSLA in slaViolados){
         if(slaViolados[indiceSLA].indexOf("-") > -1){
-          //console.log(indiceSLA + " : " + slaViolados[indiceSLA]);
           slaViolado+=1;
         }
       };
@@ -179,7 +188,6 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
     for (const indice in atribuidosEspera){
       for(var indEspera=0; indEspera<=agentes.agente.length; indEspera++) {
         if(atribuidosEspera[indice].indexOf(agentes.agente[indEspera]) > -1){
-          //console.log(indice + " : " + atribuidosEspera[indice]);
           agentes.ticketsEsperaDoAgente[indEspera]+=1;
         }
       }
@@ -190,7 +198,6 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
 
 for(i=0; i<agentes.agente.length;i++){
   if(agentes.ticketsAbertosDoAgente[i] !== 0 || agentes.ticketsEsperaDoAgente[i] !== 0 ){
-    console.log(`[${agentes.agente[i]}]\nTickets Abertos: ${agentes.ticketsAbertosDoAgente[i]} | Tickets em Espera: ${agentes.ticketsEsperaDoAgente[i]}\n`);
     listaWhats.push(`*${agentes.agente[i]}*<br>Tickets Abertos: ${agentes.ticketsAbertosDoAgente[i]} | Tickets em Espera: ${agentes.ticketsEsperaDoAgente[i]}<br><br>`);
     listaAgentesComTickets.push(`"${agentes.agente[i]}"`);
     listaAgentesComTicketsAbertos.push(agentes.ticketsAbertosDoAgente[i]);
@@ -262,14 +269,17 @@ console.log("Gerando o gráfico...");
                       beginAtZero: true
                   }
               }],
-          },
+          }
       }
   }`);
 
-  console.log("Gerado o gráfico de Abertos e em Espera de cada Agente");
+// Or write it to a file
+myChart.toFile('./2_grafico_agentes.png');
+
+console.log("Gerado o gráfico de Abertos e em Espera de cada Agente");
 
 aberto = parseInt(ticketsAbertos);
-semAtribuicao = parseInt(ticketsNaoAlocados);
+semAtribuicao = ticketsNaoAlocados+ticketsNaoAlocadosTAF;
 emEspera = parseInt(ticketsEspera);
 totalCalcPorcentagem = aberto+semAtribuicao+slaViolado+emEspera;
 
@@ -281,7 +291,7 @@ emEspera = ((emEspera/totalCalcPorcentagem)*100).toFixed(1);
 
 const chart = new QuickChart();
 
-chart.setWidth(550)
+chart.setWidth(560)
 chart.setHeight(550);
 
 chart.setConfig({
@@ -307,12 +317,13 @@ chart.setConfig({
     title: {
       display: true,
       text: 'Quadro Geral de Tickets',
+      fontSize: 16,
+      fontStyle: 'bold'
     },
     plugins:{
       datalabels: {
         anchor: "end",
         align: 'end',
-        color: "black",
         font: {
           weight: "bold",
           size: 16
@@ -325,7 +336,8 @@ chart.setConfig({
     layout:{
       padding: {
         left: 30,
-        bottom: 50
+        bottom: 30,
+        right: 30
       }
     }
   }
@@ -335,17 +347,14 @@ console.log("Gerado o gráfico do Quadro Geral dos Tickets");
 // Or write it to a file
 chart.toFile('./3_grafico_geral.png');
 
-// Or write it to a file
-myChart.toFile('./2_grafico_agentes.png');
-
 console.log("Total de tickets Abertos: " + ticketsAbertos);
 console.log("Total de tickets Não Alocados: " + ticketsNaoAlocados);
+console.log("Total de tickets Não Alocados do TAF/TSS: " + ticketsNaoAlocadosTAF);
 console.log("Total de tickets Em Espera: " + ticketsEspera);
 console.log("Total de tickets com SLA Vencidos: " + slaViolado);
 
-//Pra quando tiver uma observação a ser inserida
-//messageContent = 'Diário de Bordo | TOTVS Cloud<br><br>'+saudacao+'<br><br>Caros,<br><br>Segue abaixo a relação de tickets de hoje '+ dd + '/'+ mm + '/' + yyyy +':<br><br>Tickets Abertos: ' + ticketsAbertos.substr(64) + '<br><br>Tickets Não Alocados: ' + ticketsNaoAlocados.substr(74) + '<br><br>Obs.: Hoje temos 2 recursos a menos na equipe.'
-messageContent = '_*Diário de Bordo | TOTVS Cloud*_<br><br>'+saudacao+'<br><br>Caros,<br><br>Segue abaixo a relação de tickets de hoje '+ dd + '/'+ mm + '/' + yyyy +':<br><br>Tickets Abertos: *' + ticketsAbertos+ '*<br><br>Tickets Sem Atribuição: *' + ticketsNaoAlocados+'*<br><br>Tickets com violação de SLA: *'+slaViolado+'*<br><br>Tickets em Espera: *'+ticketsEspera+'*<br><br>Tickets abertos e em espera de cada Agente:<br><br>';
+//Mensagem pra enviar para o WhatsApp
+messageContent = '_*Diário de Bordo | TOTVS Cloud*_<br><br>'+saudacao+'<br><br>Caros,<br><br>Segue abaixo a relação de tickets de hoje '+ dd + '/'+ mm + '/' + yyyy +':<br><br>Abertos: *' + ticketsAbertos+ '*<br><br>Sem Atribuição - Protheus STD: *' + ticketsNaoAlocados+'*<br><br>Sem Atribuição - TAF/TSS: *'+ticketsNaoAlocadosTAF+'*<br><br>Com violação de SLA: *'+slaViolado+'*<br><br>Em Espera: *'+ticketsEspera+'*<br><br>Tickets abertos e em espera de cada Agente:<br><br>';
 
 fs.writeFileSync('./message_whats.html', messageContent);
 
@@ -364,7 +373,7 @@ let transporter = nodemailer.createTransport({
     to: `${yourEmail}`,
     //to: "adriano.santana@totvs.com.br, alessandro.macedo@totvs.com.br, anderson.ferreira@totvs.com.br, afelipe@totvs.com.br, beatriz.cruz@totvs.com.br, bianca.zanella@totvs.com.br, crogerio@totvs.com.br, carlos.esilva@totvs.com.br, dennis.terentjvas@totvs.com.br, eduardo.boliveira@totvs.com.br, eliel.oliveira@totvs.com.br, felipe.henrique@totvs.com.br, felipe.mororo@totvs.com.br, gabriella.lopes@totvs.com.br, santos.henrique@totvs.com.br, icaro.cardoso@totvs.com.br, jessica.anjos@totvs.com.br, joao.snascimento@totvs.com.br, jonnathan.santos@totvs.com.br, jrodrigues@totvs.com.br, l.ionafa@totvs.com.br, leandro.alcantara@totvs.com.br, leonardo.lopes@totvs.com.br, lucas.cardona@totvs.com.br, marcelo.silva@totvs.com.br, marcelo.ssilva@totvs.com.br, michel.nascimento@totvs.com.br, miguel.vieira@totvs.com.br, nilson.botelho@totvs.com.br, rogerio.mazuqui@totvs.com.br, vagner.valle@totvs.com.br",
     subject: "Diário de Bordo | TOTVS Cloud | " +hora+ "h",
-    html: '<h4>'+saudacao+'<br><br>Caros,<br><br>Segue abaixo a relação de tickets de hoje '+ dd + '/'+ mm + '/' + yyyy +':<br><br>Tickets Abertos: ' + ticketsAbertos + '<br><br>Tickets Sem Atribuição: ' + ticketsNaoAlocados + '<br><br>Tickets com violação de SLA: '+slaViolado+'<br><br>Tickets em Espera: '+ticketsEspera+'<br><br><img src="cid:print_zendesk"/><br><br><br><br><img src="cid:grafico_geral"/><br><br><br><br>Relação de tickets abertos e em espera de cada agente:<br><br><img src="cid:grafico"/><br><br>Atenciosamente,</h4><b>' +`${yourName}`+ ' / <font color="#EA9B3E">CLOUD COMPUTING</font></b><br>TOTVS MATRIZ<BR><a>(11) 4003-0015</a><br><b><strong>A TOTVS ACREDITA NO BRASIL QUE FAZ<br><img src="https://totvs.com/assinatura/11-assinatura-email-logo-totvs.gif"/>',
+    html: '<h4>'+saudacao+'<br><br>Caros,<br><br>Segue abaixo a relação de tickets de hoje '+ dd + '/'+ mm + '/' + yyyy +':<br><br>Abertos: ' + ticketsAbertos + '<br><br>Sem Atribuição - Protheus STD: ' + ticketsNaoAlocados + '<br><br>Sem Atribuição - TAF/TSS: ' + ticketsNaoAlocadosTAF + '<br><br>Com violação de SLA: '+slaViolado+'<br><br>Em Espera: '+ticketsEspera+'<br><br><img src="cid:print_zendesk"/><br><br><br><br><img src="cid:grafico_geral"/><br><br><br><br>Relação de tickets abertos e em espera de cada agente:<br><br><img src="cid:grafico"/><br><br>Atenciosamente,</h4><b>' +`${yourName}`+ ' / <font color="#EA9B3E">CLOUD COMPUTING</font></b><br>TOTVS MATRIZ<BR><a>(11) 4003-0015</a><br><b><strong>A TOTVS ACREDITA NO BRASIL QUE FAZ<br><img src="https://totvs.com/assinatura/11-assinatura-email-logo-totvs.gif"/>',
     attachments: [
         { 
           filename: '1_tickets_abertos.png',
