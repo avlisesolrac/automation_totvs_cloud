@@ -18,6 +18,8 @@ const agentes = {
   ticketsEsperaDoAgente: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 };
 
+let lista = [];
+let listaWhats = [];
 let listaAgentesComTickets = [];
 let listaAgentesComTicketsAbertos = [];
 let listaAgentesComTicketsEspera =  [];
@@ -81,36 +83,36 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
 
   //Retorna o número de páginas que tem na fila
   var numPages = await page.evaluate(() => {
-    return document.querySelectorAll('tfoot>tr>td>div>ul>li').length;
+    return document.querySelectorAll('nav:nth-child(2)>ul>li').length;
   });
 
-  numPages -=2;
+  numPages -=1;
 
-  console.log("Total de Páginas Abertos: " +(numPages-2));
+  console.log("Total de Páginas Abertos: " +(numPages-1));
 
   //Varre as páginas de tickets a partir da primeira até a última página
-  for(var i = 3; i<= numPages; i++){
+  for(var i = 2; i<= numPages; i++){
     //Se for a primeira página não vai clicar em nada, já vai estar com a primeira página carregada, caso contrário irá clicar no menu da página seguinte, 2, 3, 4 e etc...
-    if(i !== 3){
-      console.log(`Clicando na pagina ${(i-2)}`);
-      await page.click(`tfoot>tr>td>div>ul>li:nth-child(${i})`);
+    if(i !== 2){
+      console.log(`Clicando na pagina ${(i-1)}`);
+      await page.click(`nav:nth-child(2)>ul>li:nth-child(${i})`);
       await demora();
     }
 
     await page.waitForSelector('table > tbody > tr > td:nth-child(6)');
 
-    console.log(`Acessado a fila de chamados da pagina ${(i-2)}`);
+    console.log(`Acessado a fila de chamados da pagina ${(i-1)}`);
     
     //Retorna o nome do analista que está atribuído no chamado.
-    atribuidosAbertos= await page.$$eval(`table > tbody > tr > td:nth-child(6)`, (options) => options.map (
+    atribuidosAbertos= await page.$$eval(`table > tbody > tr > td:nth-child(5)`, (options) => options.map (
       (option) => `${option.innerText}`,
     ));
 
-    let slaViolados= await page.$$eval(`table > tbody > tr > td:nth-child(9)`, (options) => options.map (
+    let slaViolados= await page.$$eval(`table > tbody > tr > td:nth-child(8)`, (options) => options.map (
       (option) => `${option.innerText}`,
     ));
 
-    let groupOwner = await page.$$eval(`table > tbody > tr > td:nth-child(10)`, (options) => options.map (
+    let groupOwner = await page.$$eval(`table > tbody > tr > td:nth-child(9)`, (options) => options.map (
       (option) => `${option.innerText}`,
     ));
 
@@ -118,23 +120,24 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
     for (const indice in atribuidosAbertos){
       for(var ind=0; ind<=agentes.agente.length; ind++) {
         if(atribuidosAbertos[indice].indexOf(agentes.agente[ind]) > -1){
+          //console.log(indice + " : " + atribuidosAbertos[indice]);
           agentes.ticketsAbertosDoAgente[ind]+=1;
         }
       }
       //Aqui retorna os não alocados, mas precisa alinhar com o coordenador, pois o filtro atual do backlog não está incluindo a fila do TAF/TSS
-      if(atribuidosAbertos[indice].indexOf('-') > -1 && groupOwner[indice].indexOf('TAF') > -1){
+      if((!atribuidosAbertos[indice]) && groupOwner[indice].indexOf('TAF') > -1){
         ticketsNaoAlocadosTAF+=1;
-      }else if(atribuidosAbertos[indice].indexOf('-') > -1 && groupOwner[indice].indexOf('SQUAD') > -1){
+      }else if((!atribuidosAbertos[indice]) && groupOwner[indice].indexOf('SQUAD') > -1){
         ticketsNaoAlocados+=1;
-      }else if(atribuidosAbertos[indice].indexOf('-') > -1 && groupOwner[indice].indexOf('PROTHEUS') > -1){
+      }else if((!atribuidosAbertos[indice]) && groupOwner[indice].indexOf('PROTHEUS') > -1){
         ticketsNaoAlocados+=1;
-      }else if(atribuidosAbertos[indice].indexOf('-') > -1 && groupOwner[indice].indexOf('ATENDIMENTO') > -1){
+      }else if((!atribuidosAbertos[indice]) && groupOwner[indice].indexOf('ATENDIMENTO') > -1){
         ticketsNaoAlocados+=1;
       }
     };
-      //método push adiciona todos as ocorrencias do agente na fila de tickets abertos
-      //dados.push(atribuidosAbertos);
-      for (const indiceSLA in slaViolados){
+
+    //Conta a quantidade tickets com violação de SLA
+    for (const indiceSLA in slaViolados){
         if(slaViolados[indiceSLA].indexOf("-") > -1){
           slaViolado+=1;
         }
@@ -151,34 +154,34 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
 
   await demoraTimeout();
 
-  await page.waitForSelector('table > tbody > tr > td:nth-child(9)');
+  await page.waitForSelector('table > tbody > tr > td:nth-child(5)');
 
   console.log("Acessado a página de tickets em ESPERA");
 
   //Retorna o número de páginas que tem na fila em espera
   var numPagesEspera = await page.evaluate(() => {
-    return document.querySelectorAll('tfoot>tr>td>div>ul>li').length;
+    return document.querySelectorAll('nav:nth-child(2)>ul>li').length
   });
 
-  numPagesEspera -=2;
+  numPagesEspera -=1;
 
-  console.log("Total de Páginas em Espera: " +(numPagesEspera-2));
+  console.log("Total de Páginas em Espera: " +(numPagesEspera-1));
 
   //Varre as páginas de tickets a partir da primeira até a última página
-  for(var iEspera = 3; iEspera<= numPagesEspera; iEspera++){
+  for(var iEspera = 2; iEspera<= numPagesEspera; iEspera++){
     //Se for a primeira página não vai clicar em nada, já vai estar com a primeira página carregada, caso contrário irá clicar no menu da página seguinte, 2, 3, 4 e etc...
-    if(iEspera !== 3){
-      console.log(`Clicando na pagina ${(iEspera-2)}`);
-      await page.click(`tfoot>tr>td>div>ul>li:nth-child(${iEspera})`);
+    if(iEspera !== 2){
+      console.log(`Clicando na pagina ${(iEspera-1)}`);
+      await page.click(`nav:nth-child(2)>ul>li:nth-child(${iEspera})`);
       await demora();
     }
 
-    await page.waitForSelector('table > tbody > tr > td:nth-child(9)');
+    await page.waitForSelector('table > tbody > tr > td:nth-child(5)');
 
-    console.log(`Acessado a fila de chamados da pagina ${(iEspera-2)}`);
+    console.log(`Acessado a fila de chamados da pagina ${(iEspera-1)}`);
     
     //Retorna o nome do analista que está atribuído no chamado.
-    atribuidosEspera = await page.$$eval(`table > tbody > tr > td:nth-child(9)`, (options) => options.map (
+    atribuidosEspera = await page.$$eval(`table > tbody > tr > td:nth-child(8)`, (options) => options.map (
       (option) => `${option.innerText}`,
     ));
 
@@ -196,6 +199,7 @@ console.log("Bem vindo ao Diário de Bordo | TOTVS Cloud | Coletando os Tickets 
 
 for(i=0; i<agentes.agente.length;i++){
   if(agentes.ticketsAbertosDoAgente[i] !== 0 || agentes.ticketsEsperaDoAgente[i] !== 0 ){
+    listaWhats.push(`*${agentes.agente[i]}*<br>Tickets Abertos: ${agentes.ticketsAbertosDoAgente[i]} | Tickets em Espera: ${agentes.ticketsEsperaDoAgente[i]}<br><br>`);
     listaAgentesComTickets.push(`"${agentes.agente[i]}"`);
     listaAgentesComTicketsAbertos.push(agentes.ticketsAbertosDoAgente[i]);
     listaAgentesComTicketsEspera.push(agentes.ticketsEsperaDoAgente[i]);
@@ -270,7 +274,7 @@ console.log("Gerando o gráfico...");
       }
   }`);
 
-// Or write it to a file
+// Grava o arquivo na máquina local
 myChart.toFile('./2_grafico_agentes.png');
 
 console.log("Gerado o gráfico de Abertos e em Espera de cada Agente");
@@ -341,7 +345,7 @@ chart.setConfig({
 });
 console.log("Gerado o gráfico do Quadro Geral dos Tickets");
 
-// Or write it to a file
+// Grava o arquivo na máquina local
 chart.toFile('./3_grafico_geral.png');
 
 console.log("Total de tickets Abertos: " + ticketsAbertos);
@@ -350,11 +354,13 @@ console.log("Total de tickets Não Alocados do TAF/TSS: " + ticketsNaoAlocadosTA
 console.log("Total de tickets Em Espera: " + ticketsEspera);
 console.log("Total de tickets com SLA Vencidos: " + slaViolado);
 
-//Mensagem pra enviar para o WhatsApp
+//Mensagem para enviar para o Whatsapp
 messageContent = '_*Diário de Bordo | TOTVS Cloud*_<br><br>'+saudacao+'<br><br>Caros,<br><br>Segue abaixo a relação de tickets de hoje '+ dd + '/'+ mm + '/' + yyyy +':<br><br>Abertos: *' + ticketsAbertos+ '*<br><br>Sem Atribuição - Protheus STD: *' + ticketsNaoAlocados+'*<br><br>Sem Atribuição - TAF/TSS: *'+ticketsNaoAlocadosTAF+'*<br><br>Com violação de SLA: *'+slaViolado+'*<br><br>Em Espera: *'+ticketsEspera+'*<br><br>Tickets abertos e em espera de cada Agente:<br><br>';
 
+// Grava o arquivo na máquina local
 fs.writeFileSync('./message_whats.html', messageContent);
 
+//Envia o e-mail com os dados coletados
 let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: "587",
@@ -368,7 +374,7 @@ let transporter = nodemailer.createTransport({
   transporter.sendMail({
     from: `${yourName} <${yourEmail}>`,
     to: `${yourEmail}`,
-    //to: "adriano.santana@totvs.com.br, alessandro.macedo@totvs.com.br, anderson.ferreira@totvs.com.br, afelipe@totvs.com.br, beatriz.cruz@totvs.com.br, bianca.zanella@totvs.com.br, crogerio@totvs.com.br, carlos.esilva@totvs.com.br, dennis.terentjvas@totvs.com.br, eduardo.boliveira@totvs.com.br, eliel.oliveira@totvs.com.br, felipe.henrique@totvs.com.br, felipe.mororo@totvs.com.br, gabriella.lopes@totvs.com.br, santos.henrique@totvs.com.br, icaro.cardoso@totvs.com.br, jessica.anjos@totvs.com.br, joao.snascimento@totvs.com.br, jonnathan.santos@totvs.com.br, jrodrigues@totvs.com.br, l.ionafa@totvs.com.br, leandro.alcantara@totvs.com.br, leonardo.lopes@totvs.com.br, lucas.cardona@totvs.com.br, marcelo.silva@totvs.com.br, marcelo.ssilva@totvs.com.br, michel.nascimento@totvs.com.br, miguel.vieira@totvs.com.br, nilson.botelho@totvs.com.br, rogerio.mazuqui@totvs.com.br, vagner.valle@totvs.com.br",
+    //to: "adriano.santana@totvs.com.br, alessandro.macedo@totvs.com.br, anderson.ferreira@totvs.com.br, afelipe@totvs.com.br, beatriz.cruz@totvs.com.br, bianca.zanella@totvs.com.br, crogerio@totvs.com.br, carlos.esilva@totvs.com.br, dennis.terentjvas@totvs.com.br, eduardo.boliveira@totvs.com.br, eliel.oliveira@totvs.com.br, felipe.henrique@totvs.com.br, felipe.mororo@totvs.com.br, gabriella.lopes@totvs.com.br, santos.henrique@totvs.com.br, icaro.cardoso@totvs.com.br, jessica.anjos@totvs.com.br, joao.snascimento@totvs.com.br, jonnathan.santos@totvs.com.br, jrodrigues@totvs.com.br, l.ionafa@totvs.com.br, leandro.alcantara@totvs.com.br, leonardo.lopes@totvs.com.br, lucas.cardona@totvs.com.br, marcelo.silva@totvs.com.br, marcelo.ssilva@totvs.com.br, michel.nascimento@totvs.com.br, miguel.vieira@totvs.com.br, nilson.botelho@totvs.com.br, rogerio.mazuqui@totvs.com.br, rosana.cristina@totvs.com.br, vagner.valle@totvs.com.br",
     subject: "Diário de Bordo | TOTVS Cloud | " +hora+ "h",
     html: '<h4>'+saudacao+'<br><br>Caros,<br><br>Segue abaixo a relação de tickets de hoje '+ dd + '/'+ mm + '/' + yyyy +':<br><br>Abertos: ' + ticketsAbertos + '<br><br>Sem Atribuição - Protheus STD: ' + ticketsNaoAlocados + '<br><br>Sem Atribuição - TAF/TSS: ' + ticketsNaoAlocadosTAF + '<br><br>Com violação de SLA: '+slaViolado+'<br><br>Em Espera: '+ticketsEspera+'<br><br><img src="cid:print_zendesk"/><br><br><br><br><img src="cid:grafico_geral"/><br><br><br><br>Relação de tickets abertos e em espera de cada agente:<br><br><img src="cid:grafico"/><br><br>Atenciosamente,</h4><b>' +`${yourName}`+ ' / <font color="#EA9B3E">CLOUD COMPUTING</font></b><br>TOTVS MATRIZ<BR><a>(11) 4003-0015</a><br><b><strong>A TOTVS ACREDITA NO BRASIL QUE FAZ<br><img src="https://totvs.com/assinatura/11-assinatura-email-logo-totvs.gif"/>',
     attachments: [
