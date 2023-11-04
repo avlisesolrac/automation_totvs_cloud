@@ -51,4 +51,4 @@ Com o href dessa visualização será necessário ajustar o valor da variável *
 
 Segue abaixo exemplo de execução do script para gerar os relatórios da equipe:
 
-![Alt text](relative%20path/relatorio geral da equipe.jpeg?raw=true "Title")
+![Alt text](./relatorio geral da equipe.jpeg?raw=true "Title")
