@@ -49,6 +49,13 @@ https://totvssuporte.zendesk.com/admin/workspaces/agent-workspace/
 
 Com o href dessa visualização será necessário ajustar o valor da variável **agtCloudProtheusStdTotal** e os respectivos href
 
-Segue abaixo exemplo de execução do script para gerar os relatórios da equipe:
+**Segue abaixo exemplo de execução do script para gerar os relatórios da equipe:**
 
-https://github.com/avlisesolrac/automation_totvs_cloud/blob/main/relatorio%20geral%20da%20equipe.jpeg?raw=true
+Geral:
+
+![relatorio geral da equipe](https://github.com/avlisesolrac/automation_totvs_cloud/assets/9914439/e1ac31c6-deb0-4f05-871e-488b79482a09)
+
+
+Individual:
+
+![relatorio individual de cada integrante do time](https://github.com/avlisesolrac/automation_totvs_cloud/assets/9914439/957a251f-dd1e-4216-9340-6d5107c398b3)
