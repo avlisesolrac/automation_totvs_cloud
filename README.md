@@ -51,4 +51,4 @@ Com o href dessa visualização será necessário ajustar o valor da variável *
 
 Segue abaixo exemplo de execução do script para gerar os relatórios da equipe:
 
-https://github.com/avlisesolrac/automation_totvs_cloud/blob/761ad7e534406b89ab3b8803485eebd120c1ca19/relatorio%20geral%20da%20equipe.jpeg
+relatorio geral da equipe.jpeg
