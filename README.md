@@ -51,4 +51,4 @@ Com o href dessa visualização será necessário ajustar o valor da variável *
 
 Segue abaixo exemplo de execução do script para gerar os relatórios da equipe:
 
-![Alt text](./relatorio geral da equipe.jpeg?raw=true "Title")
+https://github.com/avlisesolrac/automation_totvs_cloud/blob/main/relatorio%20geral%20da%20equipe.jpeg?raw=true
